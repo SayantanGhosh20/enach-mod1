@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eNach - Payments | Lejhro</title>
+    <link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="https://www.paynimo.com/Paynimocheckout/client/lib/jquery.min.js" type="text/javascript"></script>
+
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        .topNav{
+            width: 100%;
+            height: 35%;
+            padding: 3em 16em;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-start;
+            background-color: #d6932b;
+        }
+        .logo{
+            height: 13%;
+        }
+        .pageTitle{
+            font-size: 36px;
+            color: #fdfdfd;
+            letter-spacing: 2px;
+            font-weight: bold;
+            text-shadow: 1px 1px 0px black;
+        }
+        .formBody{
+            width: 100%;
+            height: 65%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            align-items: center;
+            background-color: #f4f4f4;
+        }
+        .formTitle{
+            font-size: 40px;
+            color: #252525;
+            font-weight: bold;
+            visibility: hidden;
+        }
+        .formSection{
+            width: 60%;
+            height: 70%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .fieldgroup{
+            width: 45%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .inputContainer{
+            width: 100%;
+            height: 30%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        label{
+            font-size: 18px;
+            color: #252525;
+        }
+        input, select{
+            width: 100%;
+            font-size: 18px;
+            padding: 14px;
+            border-radius: 0px;
+            background-color: transparent;
+            border: none;
+            border-bottom: 2px solid #BEC1D0;
+            outline: none;
+        }
+        .errorMsg{
+            color: firebrick;
+            font-size: 14px;
+            visibility: hidden;
+        }
+        .submitFormBtn{
+            border: none;
+            outline: none;
+            border-radius: 10px;
+            padding: 10px 30px;
+            font-size: 26px;
+            letter-spacing: 1px;
+            color: #efefef;
+            background-color: #4F87EA;
+        }
+
+        /* Veil----------------------------------Veil */
+
+        .veil{
+            position: absolute;
+            top: -100%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.25);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99;
+        }
+        .confirmPanel{
+            width: 35%;
+            height: 65%;
+            position: relative;
+            background-color: #efefef;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 30px;
+            box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+        }
+        .closeVeil{
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: black;
+            font-size: 20px;
+            cursor: pointer;
+            color: #efefef;
+        }
+        .confirmHeader{
+            width: 100%;
+            height: 10%;
+            text-align: center;
+            color: #efefef;
+            font-size: 28px;
+            background-color: rgb(71, 70, 70);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .confirmData{
+            width: 100%;
+            height: 65%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .confirmField{
+            width: 100%;
+            height: 12%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .confirmData span{
+            font-size: 18px;
+        }
+
+        .confirmBtn{
+            height: 9%;
+            width: 30%;
+            border: none;
+            outline: none;
+            border-radius: 10px;
+            font-size: 20px;
+            color: #efefef;
+            letter-spacing: 2px;
+            background-color: royalblue;
+            margin-bottom: 0.5em;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .confirmPanel{
+                width: 80%;
+                height: 65%;
+            }   
+        }
+
+    </style>
+</head>
+<body>
+    <div class="veil" id="veil">
+        <div class="confirmPanel">
+            <div class="closeVeil" id="closeVeil">X</div>
+            <div class="confirmHeader">Confirm data</div>
+            <div class="confirmData">
+                <div class="confirmField">
+                    <span>Customer Name:</span>
+                    <span id="cName"></span>
+                </div>
+                <div class="confirmField">
+                    <span>Customer Id:</span>
+                    <span id="cId"></span>
+                </div>
+                <div class="confirmField">
+                    <span>Amount:</span>
+                    <span id="cAmount"></span>
+                </div>
+                <div class="confirmField">
+                    <span>No of EMI:</span>
+                    <span id="cEmiNo"></span>
+                </div>
+            </div>
+            <button class="confirmBtn" id="confirmBtn">Confirm</button>
+        </div>
+    </div>
+
+
+    <section class="topNav">
+        <img src="./lejhro_logo_white.png" alt="" class="logo">
+        <div class="pageTitle">e-Nach Registration</div>
+    </section>
+    <section class="formBody">
+        <div class="formTitle">Register</div>
+        <section class="formSection">
+            <section class="fieldgroup">
+                <!-- input1 -->
+                <section class="inputContainer">
+                    <label for="name">Customer Name</label>
+                    <input type="text" name="name" id="name">
+                    <div class="errorMsg">Err message</div>
+                </section>
+               
+                <!-- input2 -->
+                <section class="inputContainer">
+                    <label for="amount">Amount</label>
+                    <input type="text" name="amount" id="amount">
+                    <div class="errorMsg">Err message</div>
+                </section>
+            </section>
+            <section class="fieldgroup">
+                <!-- input3 -->
+                <section class="inputContainer">
+                    <label for="uid">Customer Id</label>
+                    <input type="text" name="uid" id="uid">
+                    <div class="errorMsg">Err message</div>
+                </section>
+                <!-- input4 -->
+                <section class="inputContainer">
+                    <label for="emino">No. of EMI</label>
+                    <input type="text" name="emino" id="emino">
+                    <div class="errorMsg">Err message</div>
+                </section>
+            </section>
+        </section>
+        <button class="submitFormBtn" id="submit">Submit</button>
+    </section>
+
+
+    <script type="text/javascript" src="https://www.paynimo.com/Paynimocheckout/server/lib/checkout.js"></script>
+    <script>
+        $(document).ready(function(){
+        let veil = document.getElementById('veil');
+        
+        let uName = document.getElementById('name');
+        let uId = document.getElementById('uid');
+        let amount = document.getElementById('amount');
+        let emino = document.getElementById('emino');
+
+        let cName = document.getElementById('cName');
+        let cId = document.getElementById('cId');
+        let cAmount = document.getElementById('cAmount');
+        let cEmiNo = document.getElementById('cEmiNo');
+
+        let closeVeil = document.getElementById('closeVeil');
+        let submitBtn = document.getElementById('submit');
+        let confirmBtn = document.getElementById('confirmBtn');
+
+        var configJson = {
+            'tarCall': false,
+            'features': {
+                'showPGResponseMsg': true,
+                'enableAbortResponse': true,
+                'enableNewWindowFlow': true,
+                'enableExpressPay':true,
+                'siDetailsAtMerchantEnd':true,   
+                'enableSI':true,
+            },
+            'consumerData': {
+                'deviceId': 'WEBSH2',
+                'token': '',
+                'returnUrl': 'http://127.0.0.1:3000/response',
+                'responseHandler': handleResponse,
+                'paymentMode': 'netBanking',
+                'merchantLogoUrl': 'https://www.paynimo.com/CompanyDocs/company-logo-md.png',
+                'merchantId': '',
+                'currency': 'INR',
+                'consumerId': '',
+                "consumerMobileNo": "",
+                "consumerEmailId": "",
+                'txnId': '',
+                'items': [{
+                    'itemId': 'First',
+                    'amount': '1',
+                    'comAmt': '0' 
+                }],
+                'customStyle': {
+                    'PRIMARY_COLOR_CODE': '#3977b7',
+                    'SECONDARY_COLOR_CODE': '#FFFFFF',
+                    'BUTTON_COLOR_CODE_1': '#1969bb',
+                    'BUTTON_COLOR_CODE_2': '#FFFFFF'
+                },
+            'accountNo': '',
+            'accountHolderName': '',
+            'ifscCode': '',
+            'accountType': 'Saving',
+            'debitStartDate': '',
+            'debitEndDate': '',
+            'maxAmount': '',
+            'amountType': 'M',
+            'frequency': ''
+            }
+        };
+
+        submitBtn.addEventListener('click', (e)=>{
+            e.preventDefault();
+            let uNameValue = uName.value;
+            let uIdValue = uId.value;
+            let amountValue = amount.value;
+            let eminoValue = emino.value;
+
+            let inputStatus1 = inputCheck(uName, uNameValue);
+            let inputStatus2 = inputCheck(uId, uIdValue);
+            let inputStatus3 = inputCheck(amount, amountValue);
+            let emiStatus = emiCheck(emino, eminoValue);
+
+            if(inputStatus1 && inputStatus2 && inputStatus3 && emiStatus){
+
+                cName.innerText = uNameValue;
+                cId.innerText = uIdValue;
+                cAmount.innerText = amountValue;
+                cEmiNo.innerText = eminoValue;
+
+                let cNameValue = cName.innerText;
+                let cIdValue = cId.innerText;
+                let cAmountValue = cAmount.innerText;
+                let cEmiNoValue = cEmiNo.innerText;
+                console.log(cEmiNoValue);
+                // veil.style.top = '0';
+                // veil.style.left = '0';
+
+                $.post(
+                    "http://127.0.0.1:3000/genTxnId",
+                    {
+                        name : cNameValue,
+                        uid : cIdValue,
+
+                    },
+                    function(result){
+                        let txnId = result;
+                        // veil.style.top = '0';
+                        // veil.style.left = '0';
+                        $.post(
+                            "http://127.0.0.1:3000/genHash",
+                            {
+                                plainPass : [txnId, cIdValue, cAmountValue, cEmiNoValue]
+                            },
+                            function(result){
+                                // veil.style.top = '0';
+                                // veil.style.left = '0';
+                                let resVal = result;
+                                configJson.consumerData.token = resVal[0].toString();
+                                configJson.consumerData.merchantId = resVal[1].toString();
+                                configJson.consumerData.consumerId = cIdValue.toString();
+                                configJson.consumerData.txnId = txnId.toString();
+                                configJson.consumerData.debitStartDate = resVal[2].toString();
+                                configJson.consumerData.debitEndDate = resVal[3].toString();
+                                configJson.consumerData.maxAmount = cAmountValue.toString();
+                                configJson.consumerData.frequency = resVal[4].toString();  
+
+                                $.post(
+                                    "http://127.0.0.1:3000/testRequest",
+                                    {
+                                        data : JSON.stringify({
+                                            consumerName : cNameValue,
+                                            customerId : cIdValue,
+                                            txnId : txnId,
+                                            amount : cAmountValue,
+                                            frequency : resVal[4],
+                                            debitStartDate : resVal[2],
+                                            debitEndDate : resVal[3]
+                                        })
+                                    },
+                                    function(result){
+                                        veil.style.top = '0';
+                                    }
+                                )
+
+                            }
+                        )
+                    
+                    }
+                )
+                
+            }
+        })
+
+        confirmBtn.addEventListener('click', (e)=>{
+            e.preventDefault();
+            console.log(configJson);
+            // $.pnCheckout(configJson);
+            // if(configJson.features.enableNewWindowFlow){
+            //     pnCheckoutShared.openNewWindow();
+            // }
+        })
+
+        closeVeil.addEventListener('click', (e)=>{
+            e.preventDefault();
+            veil.style.top = '-100%';
+            veil.style.left = '0';
+        })
+    })
+
+    function inputCheck(element, value){
+        let errElement = element.nextElementSibling;
+
+        if(value.length == 0){
+            errElement.innerText = 'field cannot be empty';
+            errElement.style.visibility = 'visible';
+            errElement.style.color = 'firebrick';
+            return 0;
+        }
+        else{
+            errElement.innerText = 'Err msg';
+            errElement.style.visibility = 'hidden';
+            return 1;
+        }
+    }
+
+    function emiCheck(element, value){
+        console.log(value);
+        let errElement = element.nextElementSibling;
+        if(value.length == 0){
+            errElement.innerText = 'field cannot be empty';
+            errElement.style.visibility = 'visible';
+            errElement.style.color = 'firebrick';
+            return 0;
+        }
+        else{
+            for(let i = 0; i < value.length; i++){
+                let ascii = value.charCodeAt(i);
+                console.log(ascii);
+                if( ascii < 48 || ascii > 57){
+                    errElement.innerText = 'field can only have numbers';
+                    errElement.style.visibility = 'visible';
+                    errElement.style.color = 'firebrick';
+                    console.log('less');
+                    return 0;
+                }
+            }
+            if(value <= 0 || value > 36){
+                errElement.innerText = 'value has to be between 1 - 36';
+                errElement.style.visibility = 'visible';
+                errElement.style.color = 'firebrick';
+                console.log('test');
+                return 0;
+            }
+            errElement.innerText = 'Err msg';
+            errElement.style.visibility = 'hidden';
+            return 1;
+        }
+    }
+
+    function handleResponse(res) {
+        if (typeof res != 'undefined' && typeof res.paymentMethod != 'undefined' && typeof res.paymentMethod.paymentTransaction != 'undefined' && typeof res.paymentMethod.paymentTransaction.statusCode != 'undefined' && res.paymentMethod.paymentTransaction.statusCode == '0300') {
+            // success block
+        } else if (typeof res != 'undefined' && typeof res.paymentMethod != 'undefined' && typeof res.paymentMethod.paymentTransaction != 'undefined' && typeof res.paymentMethod.paymentTransaction.statusCode != 'undefined' && res.paymentMethod.paymentTransaction.statusCode == '0398') {
+            // initiated block
+        } else {
+            // error block
+        }
+    };
+    </script>
+</body>
+</html>
