@@ -30,7 +30,7 @@ app.post('/genTxnId', (req, res)=>{
 })
 
 app.post('/genHash', (req, res)=>{
-    let merchantId = 'T877420'; // hard coded value
+    let merchantId = 'L877420'; // hard coded value
     let totalamount = '1';
     let amountType = 'M';
     let txnId = req.body.plainPass[0];
